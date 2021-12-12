@@ -41,8 +41,7 @@ class NavigationBar extends StatelessWidget {
             ),
           ],
         ),
-        primary: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.green,
       ),
     );
   }

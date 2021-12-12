@@ -1,4 +1,5 @@
 import 'package:bonch_hack/classes.dart';
+import 'package:bonch_hack/main.dart';
 import 'package:bonch_hack/pages/page_rest.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ class ListRest extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("List"),
+        title: const Text("Список заведений"),
       ),
       body: const BuildListRest(),
     );
@@ -24,18 +25,26 @@ class BuildListRest extends StatefulWidget {
 }
 
 class _BuildListRestState extends State<BuildListRest> {
+  var controller = TextEditingController();
+
   bool favorite = false;
+  String val = "";
   List<Restaurants> favRest = [];
+  List<Restaurants> dubFavRest = [];
+  List<Restaurants> dubRest = [];
 
   @override
   void initState() {
     super.initState();
+    val = "";
     favRest.clear();
     for (int i = 0; i < rest.length; i++) {
       if (rest[i].favorite) {
         favRest.add(rest[i]);
+        dubFavRest.add(rest[i]);
       }
     }
+    dubRest = rest;
   }
 
   void updateFavorite(bool fav) {
@@ -49,23 +58,77 @@ class _BuildListRestState extends State<BuildListRest> {
           }
         }
       }
+      if (val != "") {
+        if (favorite) {
+          dubFavRest = [];
+          for (int i = 0; i < favRest.length; i++) {
+            if (favRest[i].name.toLowerCase().contains(val.toLowerCase()) ||
+                favRest[i].type.toLowerCase().contains(val.toLowerCase())) {
+              dubFavRest.add(favRest[i]);
+            }
+          }
+        } else {
+          dubRest = [];
+          for (int i = 0; i < rest.length; i++) {
+            if (rest[i].name.toLowerCase().contains(val) ||
+                rest[i].type.toLowerCase().contains(val)) {
+              dubRest.add(rest[i]);
+            }
+          }
+        }
+      } else {
+        dubRest = rest;
+        dubFavRest = favRest;
+      }
+    });
+  }
+
+  void search(value) {
+    setState(() {
+      val = value;
+      if (val != "") {
+        if (favorite) {
+          dubFavRest = [];
+          for (int i = 0; i < favRest.length; i++) {
+            if (favRest[i].name.toLowerCase().contains(value.toLowerCase()) ||
+                favRest[i].type.toLowerCase().contains(value.toLowerCase())) {
+              dubFavRest.add(favRest[i]);
+            }
+          }
+        } else {
+          dubRest = [];
+          for (int i = 0; i < rest.length; i++) {
+            if (rest[i].name.toLowerCase().contains(value) ||
+                rest[i].type.toLowerCase().contains(value)) {
+              dubRest.add(rest[i]);
+            }
+          }
+        }
+      } else {
+        dubRest = rest;
+        dubFavRest = favRest;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    controller.text = val;
+    controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length));
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ListView(
         //physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         children: [
+          const SizedBox(
+            height: 8,
+          ),
           SizedBox(
             height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -97,12 +160,33 @@ class _BuildListRestState extends State<BuildListRest> {
               ],
             ),
           ),
-          TextFormField(
-            controller: TextEditingController(),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            height: 50,
+            child: TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                  filled: true,
+                  fillColor: myColor,
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15.0, horizontal: 20),
+                  hintText: 'Поиск кафе, ресторанов...',
+                  hintStyle: const TextStyle(color: Colors.white70),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(width: 2, color: Colors.green),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(width: 2, color: Colors.green),
+                    borderRadius: BorderRadius.circular(25),
+                  )),
+              onChanged: (value) => search(value),
+            ),
           ),
           favorite
-              ? BuildistSeparated(rest: favRest)
-              : BuildistSeparated(rest: rest),
+              ? BuildistSeparated(rest: dubFavRest)
+              : BuildistSeparated(rest: dubRest),
         ],
       ),
     );
@@ -130,6 +214,14 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemBuilder: (context, index) => TextButton(
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.green.shade100),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: const BorderSide(color: Colors.green, width: 2),
+                  ))),
               onPressed: () {
                 Navigator.push(
                     context,
@@ -138,24 +230,42 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
                             PageRest(info: widget.rest[index])));
               },
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                      height: 80,
-                      width: 100,
-                      child: Image.network(widget.rest[index].photo[0])),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(widget.rest[index].photo[0]),
+                      radius: 50,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.rest[index].name),
-                        Text(widget.rest[index].type),
-                        Text(widget.rest[index].reseipt),
-                        Text(widget.rest[index].score),
+                        Text(
+                          widget.rest[index].name,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        Text(
+                          widget.rest[index].type,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        Text(
+                          widget.rest[index].reseipt,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        Text(
+                          widget.rest[index].score,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
                       ],
                     ),
                   ),
+                  const Expanded(child: SizedBox()),
                   Align(
                       alignment: Alignment.centerRight,
                       child: IconButton(
@@ -172,8 +282,8 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
               ),
             ),
         separatorBuilder: (context, index) => const Divider(
-              color: Colors.grey,
-              height: 2,
+              color: Colors.white,
+              height: 7,
             ),
         itemCount: widget.rest.length);
   }
@@ -182,119 +292,296 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
 List<Restaurants> restLove = [];
 List<Restaurants> rest = [
   Restaurants(
-      //loc: const LatLng(59.943854, 30.350840),
-      name: "Birch",
-      type: "Ресторан",
-      reseipt: "₽₽₽₽",
-      score: "4,9",
-      favorite: true,
-      photo: [
-        "https://a-a-ah-ru.s3.amazonaws.com/uploads/items/150876/311659/large_%D0%B91.jpg",
-        "https://avatars.mds.yandex.net/get-altay/1666174/2a0000016b8c6a5d305841d5c63d92fc272b/XXL"
-      ],
-      menu: {
-        "Завтраки": [
-          "Сырники с соленой карамелью и сметаной 330 г:   590₽ \n\n Рикотта, яйца, сметана, соленая карамель, клюква",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ],
-        "Закуски": [
-          "Пирог с уткой, сметанным соусом и клюквой 115 г:    620₽\n\nМука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
-          "Паштет из куриной печени с гранатовой карамелью и пеканом 200г:    620₽\n\nПаштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ]
-      }),
+    menu: ["Завтраки", "Закуски"],
+    inCart: false,
+    count: 0,
+    //loc: const LatLng(59.943854, 30.350840),
+    name: "Birch",
+    type: "Ресторан",
+    reseipt: "₽₽₽₽",
+    score: "4,9",
+    favorite: true,
+    photo: [
+      "https://a-a-ah-ru.s3.amazonaws.com/uploads/items/150876/311659/large_%D0%B91.jpg",
+      "https://avatars.mds.yandex.net/get-altay/1666174/2a0000016b8c6a5d305841d5c63d92fc272b/XXL"
+    ],
+  ),
   Restaurants(
-      //loc: const LatLng(59.933816, 30.322417),
-      favorite: false,
-      name: "Terrassa",
-      type: "Ресторан",
-      reseipt: "₽₽₽₽",
-      score: "4,6",
-      photo: [
-        "https://avia-all.ru/uploads/posts/2020-07/1595027332_dbd2b2c10571d057539004b9b6366b08.jpg",
-        "https://avatars.mds.yandex.net/get-altay/200322/2a0000015b2eaed16dea4481355f5a7248a0/XXXL"
-      ],
-      menu: {
-        "Завтраки": [
-          "Сырники с соленой карамелью и сметаной 330 г:   590₽ \n\n Рикотта, яйца, сметана, соленая карамель, клюква",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ],
-        "Закуски": [
-          "Пирог с уткой, сметанным соусом и клюквой 115 г:    620₽\n\nМука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
-          "Паштет из куриной печени с гранатовой карамелью и пеканом 200г:    620₽\n\nПаштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
-          false
-        ]
-      }),
+    menu: ["Завтраки", "Закуски"],
+    inCart: false,
+    count: 0,
+    //loc: const LatLng(59.933816, 30.322417),
+    favorite: false,
+    name: "Terrassa",
+    type: "Ресторан",
+    reseipt: "₽₽₽₽",
+    score: "4,6",
+    photo: [
+      "https://avia-all.ru/uploads/posts/2020-07/1595027332_dbd2b2c10571d057539004b9b6366b08.jpg",
+      "https://avatars.mds.yandex.net/get-altay/200322/2a0000015b2eaed16dea4481355f5a7248a0/XXXL"
+    ],
+  ),
   Restaurants(
-      //loc: const LatLng(30.311953, 59.948079),
-      favorite: false,
-      name: "Корюшка",
-      type: "Ресторан",
-      reseipt: "₽₽₽₽",
-      score: "4,9",
-      photo: [
-        "https://1000prichin.ru/images/KATALOG/sankt-peterburg/Restorani/korushka/korushka_10.jpg",
-        "https://banketservice.ru/images/katalog/restoran/korushka/korushka_00009.jpg"
-      ],
-      menu: {
-        "Завтраки": [
-          "Сырники с соленой карамелью и сметаной 330 г:   590₽ \n\n Рикотта, яйца, сметана, соленая карамель, клюква",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ],
-        "Закуски": [
-          "Пирог с уткой, сметанным соусом и клюквой 115 г:    620₽\n\nМука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
-          "Паштет из куриной печени с гранатовой карамелью и пеканом 200г:    620₽\n\nПаштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
-          false
-        ]
-      }),
+    menu: ["Завтраки", "Закуски"],
+    inCart: false,
+    count: 0,
+    //loc: const LatLng(30.311953, 59.948079),
+    favorite: false,
+    name: "Корюшка",
+    type: "Ресторан",
+    reseipt: "₽₽₽₽",
+    score: "4,9",
+    photo: [
+      "https://1000prichin.ru/images/KATALOG/sankt-peterburg/Restorani/korushka/korushka_10.jpg",
+      "https://banketservice.ru/images/katalog/restoran/korushka/korushka_00009.jpg"
+    ],
+  ),
   Restaurants(
-      //loc: const LatLng(59.935840, 30.325875),
-      favorite: false,
-      name: "ЗингерЪ",
-      type: "Кафе",
-      reseipt: "₽₽₽₽",
-      score: "4,7",
-      photo: [
-        "https://avatars.mds.yandex.net/get-altay/2838749/2a00000173d88de7098a450da0e2a2a53854/XXL",
-        "http://s0.dibi.ru/sankt-peterburg/pic_800_600/26844997/97183cf040e060e09925175cadef0d87.jpg"
-      ],
-      menu: {
-        "Завтраки": [
-          "Сырники с соленой карамелью и сметаной 330 г:   590₽ \n\n Рикотта, яйца, сметана, соленая карамель, клюква",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ],
-        "Закуски": [
-          "Пирог с уткой, сметанным соусом и клюквой 115 г:    620₽\n\nМука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
-          "Паштет из куриной печени с гранатовой карамелью и пеканом 200г:    620₽\n\nПаштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
-          false
-        ]
-      }),
+    menu: ["Завтраки", "Закуски"],
+    inCart: false,
+    count: 0,
+    //loc: const LatLng(59.935840, 30.325875),
+    favorite: false,
+    name: "ЗингерЪ",
+    type: "Кафе",
+    reseipt: "₽₽₽₽",
+    score: "4,7",
+    photo: [
+      "https://avatars.mds.yandex.net/get-altay/2838749/2a00000173d88de7098a450da0e2a2a53854/XXL",
+      "http://s0.dibi.ru/sankt-peterburg/pic_800_600/26844997/97183cf040e060e09925175cadef0d87.jpg"
+    ],
+  ),
   Restaurants(
-      //loc: const LatLng(59.936796, 30.342782),
-      favorite: false,
-      name: "Мечтатели",
-      type: "Кафе",
-      reseipt: "₽₽₽₽",
-      score: "4,6",
-      photo: [
-        "https://i.timeout.ru/pix/526542.jpeg",
-        "https://fb.ru/misc/i/gallery/47201/2963568.jpg"
-      ],
-      menu: {
-        "Завтраки": [
-          "Сырники с соленой карамелью и сметаной 330 г:   590₽ \n\n Рикотта, яйца, сметана, соленая карамель, клюква",
-          "Сырники с кокосовой сгущенкой и черникой 330 г:   620₽ \n\n Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
-          false
-        ],
-        "Закуски": [
-          "Пирог с уткой, сметанным соусом и клюквой 115 г:    620₽\n\nМука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
-          "Паштет из куриной печени с гранатовой карамелью и пеканом 200г:    620₽\n\nПаштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
-          false
-        ]
-      }),
+    menu: ["Завтраки", "Закуски"],
+    inCart: false,
+    count: 0,
+    //loc: const LatLng(59.936796, 30.342782),
+    favorite: false,
+    name: "Мечтатели",
+    type: "Кафе",
+    reseipt: "₽₽₽₽",
+    score: "4,6",
+    photo: [
+      "https://i.timeout.ru/pix/526542.jpeg",
+      "https://fb.ru/misc/i/gallery/47201/2963568.jpg"
+    ],
+  ),
 ];
+
+Map<String, Map<String, List<dynamic>>> menuList = {
+  "Birch": {
+    "Завтраки": [
+      Menu(
+          count: 1,
+          description: "Рикотта, яйца, сметана, соленая карамель, клюква",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 590,
+          item: "Сырники с соленой карамелью и сметаной 330 г"),
+      Menu(
+          count: 1,
+          description:
+              "Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ],
+    "Закуски": [
+      Menu(
+          count: 1,
+          description:
+              "Мука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Пирог с уткой, сметанным соусом и клюквой 115 г"),
+      Menu(
+          count: 1,
+          description:
+              "Паштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ]
+  },
+  "Terrassa": {
+    "Завтраки": [
+      Menu(
+          count: 1,
+          description: "Рикотта, яйца, сметана, соленая карамель, клюква",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 590,
+          item: "Сырники с соленой карамелью и сметаной 330 г"),
+      Menu(
+          count: 1,
+          description:
+              "Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ],
+    "Закуски": [
+      Menu(
+          count: 1,
+          description:
+              "Мука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Пирог с уткой, сметанным соусом и клюквой 115 г"),
+      Menu(
+          count: 1,
+          description:
+              "Паштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ]
+  },
+  "ЗингерЪ": {
+    "Завтраки": [
+      Menu(
+          count: 1,
+          description: "Рикотта, яйца, сметана, соленая карамель, клюква",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 590,
+          item: "Сырники с соленой карамелью и сметаной 330 г"),
+      Menu(
+          count: 1,
+          description:
+              "Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ],
+    "Закуски": [
+      Menu(
+          count: 1,
+          description:
+              "Мука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Пирог с уткой, сметанным соусом и клюквой 115 г"),
+      Menu(
+          count: 1,
+          description:
+              "Паштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ]
+  },
+  "Корюшка": {
+    "Завтраки": [
+      Menu(
+          count: 1,
+          description: "Рикотта, яйца, сметана, соленая карамель, клюква",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 590,
+          item: "Сырники с соленой карамелью и сметаной 330 г"),
+      Menu(
+          count: 1,
+          description:
+              "Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ],
+    "Закуски": [
+      Menu(
+          count: 1,
+          description:
+              "Мука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Пирог с уткой, сметанным соусом и клюквой 115 г"),
+      Menu(
+          count: 1,
+          description:
+              "Паштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ]
+  },
+  "Мечтатели": {
+    "Завтраки": [
+      Menu(
+          count: 1,
+          description: "Рикотта, яйца, сметана, соленая карамель, клюква",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 590,
+          item: "Сырники с соленой карамелью и сметаной 330 г"),
+      Menu(
+          count: 1,
+          description:
+              "Рикотта, яйца, сметана, кокос, кокосовые сливки, черника, негрони",
+          type: "Завтраки",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ],
+    "Закуски": [
+      Menu(
+          count: 1,
+          description:
+              "Мука, сливочное масло, молоко, яйца, сахар, утка, соус терияки, сметана, клюква",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Пирог с уткой, сметанным соусом и клюквой 115 г"),
+      Menu(
+          count: 1,
+          description:
+              "Паштет из куриной печени, гранатовая карамель, желе из граната, орех пекан",
+          type: "Закуски",
+          inCart: false,
+          open: false,
+          price: 620,
+          item: "Сырники с кокосовой сгущенкой и черникой 330 г"),
+      false,
+    ]
+  }
+};
