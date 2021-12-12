@@ -134,7 +134,8 @@ class _BuildListRestState extends State<BuildListRest> {
                   onPressed: () {
                     updateFavorite(false);
                   },
-                  child: const Text("Все рестораны"),
+                  child: const SizedBox(
+                      width: 120, child: Center(child: Text("Все заведения"))),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
@@ -149,7 +150,8 @@ class _BuildListRestState extends State<BuildListRest> {
                   onPressed: () {
                     updateFavorite(true);
                   },
-                  child: const Text("Любимые рестораны"),
+                  child: const SizedBox(
+                      width: 120, child: Center(child: Text("Избранное"))),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
@@ -235,8 +237,7 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(widget.rest[index].photo[0]),
+                      backgroundImage: AssetImage(widget.rest[index].photo[0]),
                       radius: 50,
                     ),
                   ),
@@ -248,19 +249,20 @@ class _BuildistSeparatedState extends State<BuildistSeparated> {
                       children: [
                         Text(
                           widget.rest[index].name,
+                          style: const TextStyle(
+                              color: Colors.black87, fontSize: 18),
+                        ),
+                        Text(
+                          "Тип заведения: " + widget.rest[index].type,
                           style: const TextStyle(color: Colors.black87),
                         ),
                         Text(
-                          widget.rest[index].type,
-                          style: const TextStyle(color: Colors.black87),
+                          "Цены: " + widget.rest[index].reseipt,
+                          style: const TextStyle(color: Colors.red),
                         ),
                         Text(
-                          widget.rest[index].reseipt,
-                          style: const TextStyle(color: Colors.black87),
-                        ),
-                        Text(
-                          widget.rest[index].score,
-                          style: const TextStyle(color: Colors.black87),
+                          "Средняя оценка: " + widget.rest[index].score,
+                          style: TextStyle(color: Colors.greenAccent.shade700),
                         ),
                       ],
                     ),
@@ -300,9 +302,9 @@ List<Restaurants> rest = [
     type: "Ресторан",
     reseipt: "₽₽₽₽",
     score: "4,9",
-    favorite: true,
+    favorite: false,
     photo: [
-      "https://a-a-ah-ru.s3.amazonaws.com/uploads/items/150876/311659/large_%D0%B91.jpg",
+      "assets/large_й1.jpg",
       "https://avatars.mds.yandex.net/get-altay/1666174/2a0000016b8c6a5d305841d5c63d92fc272b/XXL"
     ],
   ),
@@ -317,7 +319,7 @@ List<Restaurants> rest = [
     reseipt: "₽₽₽₽",
     score: "4,6",
     photo: [
-      "https://avia-all.ru/uploads/posts/2020-07/1595027332_dbd2b2c10571d057539004b9b6366b08.jpg",
+      "assets/2.jpg",
       "https://avatars.mds.yandex.net/get-altay/200322/2a0000015b2eaed16dea4481355f5a7248a0/XXXL"
     ],
   ),
@@ -332,7 +334,7 @@ List<Restaurants> rest = [
     reseipt: "₽₽₽₽",
     score: "4,9",
     photo: [
-      "https://1000prichin.ru/images/KATALOG/sankt-peterburg/Restorani/korushka/korushka_10.jpg",
+      "assets/3.jpg",
       "https://banketservice.ru/images/katalog/restoran/korushka/korushka_00009.jpg"
     ],
   ),
@@ -347,7 +349,7 @@ List<Restaurants> rest = [
     reseipt: "₽₽₽₽",
     score: "4,7",
     photo: [
-      "https://avatars.mds.yandex.net/get-altay/2838749/2a00000173d88de7098a450da0e2a2a53854/XXL",
+      "assets/4.jpg",
       "http://s0.dibi.ru/sankt-peterburg/pic_800_600/26844997/97183cf040e060e09925175cadef0d87.jpg"
     ],
   ),
@@ -361,10 +363,7 @@ List<Restaurants> rest = [
     type: "Кафе",
     reseipt: "₽₽₽₽",
     score: "4,6",
-    photo: [
-      "https://i.timeout.ru/pix/526542.jpeg",
-      "https://fb.ru/misc/i/gallery/47201/2963568.jpg"
-    ],
+    photo: ["assets/5.png", "https://fb.ru/misc/i/gallery/47201/2963568.jpg"],
   ),
 ];
 

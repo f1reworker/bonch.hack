@@ -3,10 +3,10 @@ import 'package:flutter/widgets.dart';
 
 int _data = 0;
 List<Menu> data2 = [];
-List<Menu> nowOrderData = cart;
+Set<String> nowOrderData = {};
 
 class ChangeSumm with ChangeNotifier {
-  List<Menu> get getNowOrderData => nowOrderData;
+  Set<String> get getNowOrderData => nowOrderData;
   int get getData => _data;
   List<Menu> get getData2 => data2;
   void getList(menu) {

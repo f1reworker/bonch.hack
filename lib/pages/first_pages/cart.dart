@@ -1,3 +1,4 @@
+import 'package:bonch_hack/main.dart';
 import 'package:bonch_hack/pages/first_pages/list_rest.dart';
 import 'package:bonch_hack/provider/data.dart';
 import 'package:bonch_hack/utils.dart';
@@ -32,7 +33,7 @@ class _CartState extends State<Cart> {
     } else if (dropdownValue == "...") {
       text = 'Пожалуйста, выберите стол.';
     } else {
-      text = 'Спасибо, мы приняли ваш заказ, нажмите "Ок" для подтверждения';
+      text = 'Оформить заказ?';
     }
 
     showDialog<String>(
@@ -50,8 +51,7 @@ class _CartState extends State<Cart> {
                       child: const Text("Отмена")),
                   TextButton(
                       onPressed: () {
-                        if (text ==
-                            'Спасибо, мы приняли ваш заказ, нажмите "Ок" для подтверждения') {
+                        if (text == 'Оформить заказ?') {
                           String name2 = countRest.toList()[0];
                           if (nowRest != "") {
                             lastOrder.addAll({nowRest: nowOrder});
@@ -95,7 +95,7 @@ class _CartState extends State<Cart> {
     return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text("Cart"),
+          title: const Text("Корзина"),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -293,40 +293,53 @@ class CartItem extends StatelessWidget {
               ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width - 170,
-                              child: ListView(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  children: [
-                                    Text(context
-                                            .watch<ChangeSumm>()
-                                            .getData2[index]
-                                            .item +
-                                        ":   " +
-                                        context
-                                            .watch<ChangeSumm>()
-                                            .getData2[index]
-                                            .price
-                                            .toString()),
-                                  ])),
-                          CountButton(
-                            index: index,
-                          )
-                        ],
+                  itemBuilder: (context, index) => Container(
+                        padding: const EdgeInsets.fromLTRB(9, 10, 6, 10),
+                        decoration: BoxDecoration(
+                            color: myColor,
+                            border: Border.all(
+                              color: Colors.green,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20))),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width - 170,
+                                child: ListView(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    children: [
+                                      Text(context
+                                              .watch<ChangeSumm>()
+                                              .getData2[index]
+                                              .item +
+                                          ":   " +
+                                          context
+                                              .watch<ChangeSumm>()
+                                              .getData2[index]
+                                              .price
+                                              .toString()),
+                                    ])),
+                            CountButton(
+                              index: index,
+                            )
+                          ],
+                        ),
                       ),
                   separatorBuilder: (context, index) => const Divider(
-                        color: Colors.grey,
-                        height: 2,
+                        color: Colors.white,
+                        height: 9,
                       ),
                   itemCount: context.watch<ChangeSumm>().getData2.length),
+              const SizedBox(
+                height: 5,
+              ),
               _CartState().buildHeader(
-                  header: "Выберите стол",
-                  child: Image.asset("assets/ylassicheskiy_zal.jpg")),
-              const DropDown(),
+                  header: "Выберите стол", child: const DropDown()),
+              Image.asset("assets/ylassicheskiy_zal.jpg")
             ],
           )
         : const SizedBox();

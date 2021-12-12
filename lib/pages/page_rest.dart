@@ -1,4 +1,5 @@
 import 'package:bonch_hack/classes.dart';
+import 'package:bonch_hack/main.dart';
 import 'package:bonch_hack/models/bottom_navigation.dart';
 import 'package:bonch_hack/pages/first_pages/list_rest.dart';
 import 'package:bonch_hack/provider/data.dart';
@@ -58,7 +59,7 @@ class _BodyPageRestState extends State<BodyPageRest> {
     return ListView(
       shrinkWrap: true,
       children: [
-        Image.network(widget.info.photo[0]),
+        Image.asset(widget.info.photo[0]),
         BuildMenu(
           info: widget.info,
         )
@@ -114,6 +115,7 @@ class _BuildMenuState extends State<BuildMenu> {
                           countRest.add(name);
                           context.read<ChangeSumm>().getList(cart);
                           context.read<ChangeSumm>().changeSumm(cart);
+                          context.read<ChangeSumm>().getNowOrder(nowRest);
                         }
                       },
                       child: const Text('Да')),
@@ -160,8 +162,8 @@ class _BuildMenuState extends State<BuildMenu> {
                     menuList[widget.info.name]![widget.info.menu[index]]!
                                 .last ==
                             false
-                        ? Icon(Icons.chevron_right_sharp)
-                        : Icon(Icons.keyboard_arrow_down_sharp),
+                        ? const Icon(Icons.chevron_right_sharp)
+                        : const Icon(Icons.keyboard_arrow_down_sharp),
                     Text(widget.info.menu[index])
                   ]),
                   // ignore: unrelated_type_equality_checks
@@ -173,12 +175,14 @@ class _BuildMenuState extends State<BuildMenu> {
                           itemBuilder: (context, ind) => Padding(
                                 padding: const EdgeInsets.all(6.0),
                                 child: Container(
-                                  margin: EdgeInsets.all(2),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(9, 10, 3, 10),
                                   decoration: BoxDecoration(
+                                      color: myColor,
                                       border: Border.all(
                                         color: Colors.green,
                                       ),
-                                      borderRadius: BorderRadius.all(
+                                      borderRadius: const BorderRadius.all(
                                           Radius.circular(20))),
                                   child: Row(
                                     mainAxisAlignment:
@@ -188,33 +192,39 @@ class _BuildMenuState extends State<BuildMenu> {
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width -
-                                              80,
+                                              90,
                                           child: ListView(
                                               physics:
                                                   const NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
                                               children: [
-                                                Text((menuList[
-                                                            widget.info
-                                                                .name]![widget
-                                                            .info
-                                                            .menu[index]]![ind]
-                                                        .item +
-                                                    ":   " +
-                                                    menuList[widget.info.name]![
-                                                            widget.info.menu[
-                                                                index]]![ind]
-                                                        .price
-                                                        .toString() +
-                                                    "P")),
+                                                Text(
+                                                  menuList[widget.info.name]![
+                                                              widget.info.menu[
+                                                                  index]]![ind]
+                                                          .item +
+                                                      ":   " +
+                                                      menuList[widget
+                                                                  .info.name]![
+                                                              widget.info.menu[
+                                                                  index]]![ind]
+                                                          .price
+                                                          .toString() +
+                                                      "P",
+                                                  style: const TextStyle(
+                                                      color: Colors.black87),
+                                                ),
                                                 const SizedBox(
                                                   height: 10,
                                                 ),
                                                 Text(
-                                                    menuList[widget.info.name]![
-                                                            widget.info.menu[
-                                                                index]]![ind]
-                                                        .description)
+                                                  menuList[widget.info.name]![
+                                                          widget.info.menu[
+                                                              index]]![ind]
+                                                      .description,
+                                                  style: const TextStyle(
+                                                      color: Colors.black87),
+                                                )
                                               ])),
                                       IconButton(
                                           onPressed: () {
@@ -222,15 +232,23 @@ class _BuildMenuState extends State<BuildMenu> {
                                             String type =
                                                 widget.info.menu[index];
                                             addToCart(name, type, ind);
+                                            setState(() {});
                                           },
-                                          icon: const Icon(
-                                              Icons.add_shopping_cart_outlined))
+                                          icon: Icon(
+                                            Icons.add_shopping_cart_outlined,
+                                            color: menuList[widget.info.name]![
+                                                        widget.info
+                                                            .menu[index]]![ind]
+                                                    .inCart
+                                                ? Colors.red
+                                                : Colors.black87,
+                                          ))
                                     ],
                                   ),
                                 ),
                               ),
                           separatorBuilder: (context, index) => const Divider(
-                                color: Colors.grey,
+                                color: Colors.white,
                                 height: 2,
                               ),
                           itemCount: menuList[widget.info.name]![
